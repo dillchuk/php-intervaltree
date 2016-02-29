@@ -1,4 +1,6 @@
-<?php namespace IntervalTree;
+<?php
+
+namespace IntervalTree;
 
 /**
  * An Interval Tree implementation.
@@ -9,8 +11,8 @@
  *  - https://github.com/misshie/interval-tree
  *
  */
-class IntervalTree
-{
+class IntervalTree {
+
     /**
      * @var \IntervalTree\TreeNode
      */
@@ -32,8 +34,7 @@ class IntervalTree
      *
      * @return void
      */
-    public function __construct(array $ranges, callable $comparator = null)
-    {
+    public function __construct(array $ranges, callable $comparator = null) {
         $this->comparator = $comparator;
 
         $this->top_node = $this->divide_intervals($ranges);
@@ -46,8 +47,7 @@ class IntervalTree
      *
      * @return array
      */
-    public function search($interval)
-    {
+    public function search($interval) {
         if (is_null($this->top_node)) {
             return array();
         }
@@ -55,7 +55,8 @@ class IntervalTree
         $result = $this->find_intervals($interval);
         $result = array_values($result);
 
-        usort($result, function (RangeInterface $a, RangeInterface $b) {
+        usort($result,
+        function (RangeInterface $a, RangeInterface $b) {
             $x = $a->getStart();
             $y = $b->getStart();
 
@@ -78,8 +79,7 @@ class IntervalTree
      *
      * @return \IntervalTree\TreeNode|null
      */
-    protected function divide_intervals(array $intervals)
-    {
+    protected function divide_intervals(array $intervals) {
         if (count($intervals) === 0) {
             return null;
         }
@@ -92,7 +92,7 @@ class IntervalTree
         foreach ($intervals as $k) {
             if ($k->getStart() > $k->getEnd()) {
                 throw new NegativeRangeException(
-                    'Range is negative (maybe you entered the range in reverse order?)'
+                'Range is negative (maybe you entered the range in reverse order?)'
                 );
             }
             if ($this->compare($k->getEnd(), $x_center) < 0) {
@@ -105,10 +105,8 @@ class IntervalTree
         }
 
         return new TreeNode(
-            $x_center,
-            $s_center,
-            $this->divide_intervals($s_left),
-            $this->divide_intervals($s_right)
+        $x_center, $s_center, $this->divide_intervals($s_left),
+        $this->divide_intervals($s_right)
         );
     }
 
@@ -117,12 +115,11 @@ class IntervalTree
      *
      * @return mixed
      */
-    protected function center(array $intervals)
-    {
-        usort($intervals, function (RangeInterface $a, RangeInterface $b) {
+    protected function center(array $intervals) {
+        usort($intervals,
+        function (RangeInterface $a, RangeInterface $b) {
             return $this->compare(
-                $a->getStart(),
-                $b->getStart()
+            $a->getStart(), $b->getStart()
             );
         });
 
@@ -134,8 +131,7 @@ class IntervalTree
      *
      * @return mixed
      */
-    protected function find_intervals($interval)
-    {
+    protected function find_intervals($interval) {
         if ($interval instanceof RangeInterface) {
             $first = $interval->getStart();
             $last = $interval->getEnd();
@@ -162,13 +158,13 @@ class IntervalTree
      *
      * @return array
      */
-    protected function point_search(TreeNode $node, $point)
-    {
+    protected function point_search(TreeNode $node, $point) {
         $result = array();
 
         // check whether the node values overlap point.
         foreach ($node->s_center as $k) {
-            if ($this->compare($k->getStart(), $point) <= 0 && $this->compare($k->getEnd(), $point) > 0) {
+            if ($this->compare($k->getStart(), $point) <= 0 && $this->compare($k->getEnd(),
+            $point) > 0) {
                 $result[spl_object_hash($k)] = $k;
             }
         }
@@ -179,15 +175,13 @@ class IntervalTree
 
         if ($node->left_node && $comparedValue < 0) {
             $result = array_merge(
-                $result,
-                $this->point_search($node->left_node, $point, $result)
+            $result, $this->point_search($node->left_node, $point, $result)
             );
         }
 
         if ($node->right_node && $comparedValue > 0) {
             $result = array_merge(
-                $result,
-                $this->point_search($node->right_node, $point, $result)
+            $result, $this->point_search($node->right_node, $point, $result)
             );
         }
 
@@ -200,8 +194,7 @@ class IntervalTree
      *
      * return int
      */
-    protected function compare($a, $b)
-    {
+    protected function compare($a, $b) {
         if (is_null($this->comparator)) {
             if ($a < $b) {
                 return -1;
@@ -214,4 +207,5 @@ class IntervalTree
 
         return call_user_func($this->comparator, $a, $b);
     }
+
 }

@@ -1,80 +1,69 @@
-<?php namespace IntervalTree;
+<?php
+
+namespace IntervalTree;
 
 use DateTime;
 use DateInterval;
 
-/**
- * Date range which excludes intersecting dates.
- */
-class DateRangeExclusive implements RangeInterface
-{
-    /**
-     * @var \DateTime
-     */
-    protected $start;
+class DateRangeExclusive implements RangeInterface, \Iterator {
+
+    protected $start, $end, $step;
 
     /**
-     * @var \DateTime
+     * Iterator state.
      */
-    protected $end;
+    protected $iterPos = 0;
+    protected $iterVal;
 
-    /**
-     * @var \DateInterval
-     */
-    protected $step;
-
-    /**
-     * @param \DateTime     $start
-     * @param \DateTime     $end
-     * @param \DateInterval $step
-     */
-    public function __construct(DateTime $start, DateTime $end = null, DateInterval $step = null)
-    {
+    public function __construct(DateTime $start, DateTime $end = null,
+    DateInterval $step = null) {
         $this->start = clone $start;
         $this->end = clone $end;
-        $this->step = $step ?: new DateInterval('P1D');
+        $this->step = $step ? : new DateInterval('P1D');
+
+        $this->iterVal = clone $start;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return \DateTime
-     */
-    public function getStart()
-    {
+    public function iterable() {
+        return $this;
+    }
+
+    public function getStart() {
         return $this->start;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return \DateTime
-     */
-    public function getEnd()
-    {
+    public function getEnd() {
         return $this->end;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return \Generator
-     */
-    public function iterable()
-    {
-        $date = clone $this->getStart();
+    public function __toString() {
+        return $this->start->format('Y-m-d') . ' .. ' . $this->end->format('Y-m-d');
+    }
 
-        while ($date < $this->getEnd()) {
-            yield $date;
-            $date->add($this->step);
+    /**
+     * Iterator below.
+     */
+    public function current() {
+        return clone $this->iterVal;
+    }
+
+    public function key() {
+        return $this->iterPos;
+    }
+
+    public function next() {
+        $this->iterPos++;
+        $this->iterVal->add($this->step);
+    }
+
+    public function rewind() {
+        if ($this->iterPos) {
+            throw new \Exception('Iterator is forward-only');
         }
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->start->format('Y-m-d').' .. '.$this->end->format('Y-m-d');
+    public function valid() {
+        return ($this->iterVal < $this->getEnd());
     }
+
 }

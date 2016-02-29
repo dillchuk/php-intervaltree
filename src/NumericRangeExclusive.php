@@ -1,74 +1,69 @@
-<?php namespace IntervalTree;
+<?php
 
-/**
- * Numeric range excluding intersecting numbers.
- */
-class NumericRangeExclusive implements RangeInterface
-{
-    /**
-     * @var int
-     */
-    protected $start;
+namespace IntervalTree;
 
-    /**
-     * @var int
-     */
-    protected $end;
+use DateTime;
+use DateInterval;
+
+class NumericRangeExclusive implements RangeInterface, \Iterator {
+
+    protected $start, $end, $step;
 
     /**
-     * @var int
+     * Iterator state.
      */
-    protected $step;
+    protected $iterPos = 0;
+    protected $iterVal;
 
-    /**
-     * @param int $start
-     * @param int $end
-     * @param int $step
-     */
-    public function __construct($start, $end = null, $step = 1)
-    {
+    public function __construct($start, $end = null, $step = 1) {
         $this->start = $start;
         $this->end = $end;
         $this->step = $step;
+
+        $this->iterPos = 0;
+        $this->iterVal = $this->start;
     }
 
-    /**
-     * @return int
-     *
-     * {@inheritDoc}
-     */
-    public function getStart()
-    {
+    public function iterable() {
+        return $this;
+    }
+
+    public function getStart() {
         return $this->start;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return int
-     */
-    public function getEnd()
-    {
+    public function getEnd() {
         return $this->end;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return \Generator
-     */
-    public function iterable()
-    {
-        for ($i = $this->getStart(); $i < $this->getEnd(); $i += $this->step) {
-            yield $i;
-        }
+    public function __toString() {
+        return $this->start . '..' . $this->end;
     }
 
     /**
-     * @return string
+     * Iterator below.
      */
-    public function __toString()
-    {
-        return $this->start.'..'.$this->end;
+    public function current() {
+        return $this->iterVal;
     }
+
+    public function key() {
+        return $this->iterPos;
+    }
+
+    public function next() {
+        $this->iterPos++;
+        $this->iterVal += $this->step;
+    }
+
+    public function rewind() {
+        if ($this->iterPos) {
+            throw new \Exception('Iterator is forward-only');
+        }
+    }
+
+    public function valid() {
+        return ($this->iterVal < $this->getEnd());
+    }
+
 }

@@ -1,5 +1,7 @@
 # A PHP implementation of the Interval Tree data structure
 
+This is a back-port to PHP5.4.
+
 Based on:
 
  - https://github.com/tylerkahn/intervaltree-python
