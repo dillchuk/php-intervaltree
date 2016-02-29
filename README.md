@@ -10,3 +10,15 @@ Based on:
 Your range objects should implement IntervalTree\RangeInterface. There are
 numeric and DateTime-based implementations included.
 
+To install via Composer:
+
+1. `composer.phar require judev/php-intervaltree:dev-master`
+2. add to composer.json:
+```
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/dillchuk/php-intervaltree"
+        }
+    ],
+ ```
